@@ -144,8 +144,8 @@ f = open('data.p', 'rb')
 oh = OneHotEncoder(sparse=False)
 oh.fit(y_train)
 acc_dict = dict()
-#repeat = 30
-#sf_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+# repeat = 30
+# sf_rates = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 scale = float(sys.argv[1])
 small_filter_rate = float(sys.argv[2])
 
