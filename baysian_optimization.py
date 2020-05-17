@@ -13,9 +13,9 @@ from bayes_opt.util import load_logs
 from parameter_to_acc_func import parameter_to_accuracy
 # Bounded region of parameter space
 pbounds = {
-    'squeeze_scale_exp': (-2., 5.),  # 8
+    'squeeze_scale_exp': (-1., 1.5),  # 2
     'small_filter_rate': (0., 1.),  # 10
-    'lr_exp': (-5., 0.)            # 6
+    'lr_exp': (-5., -3.)            # 6
 }
 
 optimizer = BayesianOptimization(
