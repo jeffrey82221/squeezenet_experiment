@@ -128,7 +128,7 @@ def squeeze_net(IMAGE_SIZE=[32, 32],
                              activation='relu',
                              name='conv10')(y)
   y = tf.keras.layers.GlobalAveragePooling2D(name='avgpool10')(y)
-  y = tf.keras.layers.Activation('softmax', name='loss')(y)
+  y = tf.keras.layers.Activation('sigmoid', name='loss')(y)
   model = tf.keras.Model(x, y, name='squeezenet_v1.1')
   if verbose:
     model.summary()
@@ -153,7 +153,8 @@ lr = float(sys.argv[3])
 op = tf.keras.optimizers.Nadam(
     lr=lr)  # , decay=1e-6, momentum=0.9)
 model = squeeze_net(small_filter_rate=small_filter_rate, squeeze_scale=scale, verbose=False)
-model.compile(loss='categorical_crossentropy',
+loss = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
+model.compile(loss=loss,
               optimizer=op,
               metrics=['acc'])
 stop_early = tf.keras.callbacks.EarlyStopping(monitor='val_acc',
