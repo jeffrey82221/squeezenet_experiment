@@ -128,7 +128,7 @@ def squeeze_net(IMAGE_SIZE=[32, 32],
                              activation='relu',
                              name='conv10')(y)
   y = tf.keras.layers.GlobalAveragePooling2D(name='avgpool10')(y)
-  y = tf.keras.layers.Activation('sigmoid', name='loss')(y)
+#y = tf.keras.layers.Activation('sigmoid', name='loss')(y)
   model = tf.keras.Model(x, y, name='squeezenet_v1.1')
   if verbose:
     model.summary()

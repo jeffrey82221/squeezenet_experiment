@@ -13,9 +13,9 @@ from bayes_opt.util import load_logs
 from SqueezeNetFunction import SqueezeNetFunction
 # Bounded region of parameter space
 pbounds = {
-    'squeeze_scale_exp': (-1., 1.5),  # 2
-    'small_filter_rate': (0., 1.),  # 10
-    'lr_exp': (-5., -3.)            # 6
+    'squeeze_scale_exp': (1.5, 1.5),  # 2
+    'small_filter_rate': (0.5, 0.5),  # 10
+    'lr_exp': (-6., -3.5)            # 6
 }
 
 optimizer = BayesianOptimization(
