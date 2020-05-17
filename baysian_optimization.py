@@ -10,7 +10,7 @@ from bayes_opt import BayesianOptimization
 from bayes_opt.logger import JSONLogger
 from bayes_opt.event import Events
 from bayes_opt.util import load_logs
-from parameter_to_acc_func import parameter_to_accuracy
+from SqueezeNetFunction import SqueezeNetFunction
 # Bounded region of parameter space
 pbounds = {
     'squeeze_scale_exp': (-1., 1.5),  # 2
@@ -19,12 +19,12 @@ pbounds = {
 }
 
 optimizer = BayesianOptimization(
-    f=parameter_to_accuracy,
+    f=SqueezeNetFunction,
     pbounds=pbounds,
     random_state=7,
 )
 try:
-    load_logs(new_optimizer, logs=["./baysian_logs.json"])
+    load_logs(optimizer, logs=["./baysian_logs.json"])
 except:
     print('no baysian_logs')
 
