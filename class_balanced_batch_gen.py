@@ -17,7 +17,7 @@ class ClassBalancedBatchGenerator(Sequence):
     self.y_train = y_train
     self.batch_size = batch_size
     assert self.batch_size % 100 == 0
-    self.generator = self.train_generator(batch_size=batch_size)
+    self.generator = self.train_generator()
 
   def __len__(self):
     return int(self.X_train.shape[0] / self.batch_size)
