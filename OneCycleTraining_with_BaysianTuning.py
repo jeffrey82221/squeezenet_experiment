@@ -19,7 +19,7 @@ def OneCycleTrain(squeeze_scale_exp, small_filter_rate, max_lr_exp, max_momentum
     small_filter_rate = small_filter_rate  # float(sys.argv[2])  # float(sys.argv[2])
     max_lr = 10**max_lr_exp  # float(sys.argv[3])
     max_momentum = max_momentum
-    num_epoch = num_epoch  # int(sys.argv[4])
+    num_epoch = int(num_epoch)  # int(sys.argv[4])
     batch_size = 2048
     #minimum_lr = 1e-8
     #maximum_lr = 1e8
