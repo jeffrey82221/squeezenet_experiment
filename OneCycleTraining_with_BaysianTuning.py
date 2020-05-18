@@ -65,7 +65,7 @@ pbounds = {
     'small_filter_rate': (0.5, 0.5),  # 10
     'max_lr_exp': (-6, -1),            # 6
     'max_momentum': (0.8, 0.99),
-    'num_epoch': (3, 100)
+    'num_epoch': (3, 30)
 }
 optimizer = BayesianOptimization(
     f=OneCycleTrain,
