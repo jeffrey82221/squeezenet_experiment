@@ -2,9 +2,9 @@ from __future__ import print_function
 import os
 import numpy as np
 import warnings
-from keras.callbacks import Callback
-from keras import backend as K
-from Evaluation import get_scores, result_predict, tag_wise_log_loss
+from tensorflow.keras.callbacks import Callback
+from tensorflow.keras import backend as K
+#from Evaluation import get_scores, result_predict, tag_wise_log_loss
 from File_Access_Util import save_object
 
 # Code is ported from https://github.com/fastai/fastai
