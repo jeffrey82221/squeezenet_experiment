@@ -58,7 +58,7 @@ def OneCycleTrain(squeeze_scale_exp, small_filter_rate, max_lr_exp,
                             maximum_momentum=max_momentum,
                             minimum_momentum=max_momentum - 0.1)
     stop_early = tf.keras.callbacks.EarlyStopping(monitor='val_acc',
-                                                  num_samples / float(batch_size)
+                                                  num_samples / float(batch_size),
                                                   patience=num_samples / float(batch_size) / 4.,
                                                   # if random prediction continue for 1/4 epochs, stop training
                                                   verbose=1)
