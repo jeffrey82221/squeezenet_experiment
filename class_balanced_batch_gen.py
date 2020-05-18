@@ -23,7 +23,7 @@ class ClassBalancedBatchGenerator(Sequence):
   def get_rearranged_batch_indices(self, X_train, y_train):
     num_instance_for_each_class = int(len(X_train) / 100)
     indices_for_each_class = [
-        np.where(y_train == 0)[0] for c in range(100)
+        np.where(y_train == c)[0] for c in range(100)
     ]
     for c in range(100):
       random.shuffle(indices_for_each_class[c])
