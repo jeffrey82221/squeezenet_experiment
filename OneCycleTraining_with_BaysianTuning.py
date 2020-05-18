@@ -28,7 +28,7 @@ def OneCycleTrain(squeeze_scale_exp, small_filter_rate, max_lr_exp, max_momentum
                          y_test) = pickle.load(f)  # cifar100.load_data()
     num_samples = len(X_train)
 
-    op = tf.keras.optimizers.SGD(momentum=max_momentum - 0.05)  # , decay=1e-6, momentum=0.9)
+    op = tf.keras.optimizers.SGD(momentum=max_momentum - 0.05, nesterov=True)  # , decay=1e-6, momentum=0.9)
     model = squeeze_net(small_filter_rate=small_filter_rate,
                         squeeze_scale=scale,
                         verbose=False)
