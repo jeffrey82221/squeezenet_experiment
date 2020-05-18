@@ -4,15 +4,15 @@ from numba import cuda
 import pickle
 import tensorflow as tf
 from SqueezeNet import squeeze_net
+from class_balanced_batch_gen import ClassBalancedBatchGenerator
 from sklearn.preprocessing import OneHotEncoder
+
 #from clr import LRFinder
 from clr import OneCycleLR
 import gc
-from numba import cuda
+
 
 # Reference: https://github.com/titu1994/keras-one-cycle
-
-
 class Avoid_Divergence(tf.keras.callbacks.Callback):
     def __init__(self, random_accuracy, num_batch):
         super(tf.keras.callbacks.Callback, self).__init__()
@@ -42,7 +42,7 @@ def OneCycleTrain(squeeze_scale_exp, small_filter_rate, max_lr_exp,
     max_lr = 10**max_lr_exp  # float(sys.argv[3])
     max_momentum = max_momentum
     num_epoch = int(num_epoch)  # int(sys.argv[4])
-    batch_size = 2048
+    batch_size = 2000
     #minimum_lr = 1e-8
     #maximum_lr = 1e8
     f = open('data.p', 'rb')
@@ -65,17 +65,23 @@ def OneCycleTrain(squeeze_scale_exp, small_filter_rate, max_lr_exp,
     stop_to_avoid_divergence = Avoid_Divergence(
         random_accuracy=1. / float(max(y_train)[0] + 1),
         num_batch=num_samples / float(batch_size))
-    model.compile(loss=loss, optimizer=op, metrics=['acc'])
     oh = OneHotEncoder(sparse=False)
     oh.fit(y_train)
-    history = model.fit(
+    model.compile(loss=loss, optimizer=op, metrics=['acc'])
+    train_data_generator = ClassBalancedBatchGenerator(
         X_train / 255.,
         oh.transform(y_train),
+        batch_size)
+    history = model.fit_generator(
+        train_data_generator,
+        steps_per_epoch=int(num_samples / batch_size),
         epochs=num_epoch,
-        batch_size=batch_size,
-        validation_data=(X_test / 255., oh.transform(y_test)),
+        # batch_size=batch_size,
+        validation_data=(
+            X_test / 255.,
+            oh.transform(y_test)),
         callbacks=[lr_manager, stop_early, stop_to_avoid_divergence],
-        shuffle=True)
+        shuffle=False)
     try:
         final_val_acc = history.history['val_acc'][-1]
     except:
