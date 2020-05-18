@@ -81,7 +81,9 @@ def OneCycleTrain(squeeze_scale_exp, small_filter_rate, max_lr_exp,
             X_test / 255.,
             oh.transform(y_test)),
         callbacks=[lr_manager, stop_early, stop_to_avoid_divergence],
-        shuffle=False)
+        shuffle=False,
+        use_multiprocessing=False
+    )
     try:
         final_val_acc = history.history['val_acc'][-1]
     except:
