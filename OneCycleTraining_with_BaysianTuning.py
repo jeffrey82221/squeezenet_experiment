@@ -19,6 +19,7 @@ class Avoid_Divergence(tf.keras.callbacks.Callback):
         self.random_accuracy = random_accuracy
         self.invalid_batch_count = 0
         self.patient = num_batch / 4.
+        # if random prediction continue for 1/4 epochs, stop training
         self.num_batch = num_batch
 
     def on_train_batch_end(self, batch, logs=None):
@@ -58,16 +59,12 @@ def OneCycleTrain(squeeze_scale_exp, small_filter_rate, max_lr_exp,
     lr_manager = OneCycleLR(max_lr,
                             maximum_momentum=max_momentum,
                             minimum_momentum=max_momentum - 0.1)
-    stop_early = tf.keras.callbacks.EarlyStopping(
-        monitor='val_acc',
-        num_samples / float(batch_size),
-        patience=num_samples / float(batch_size) / 4.,
-        # if random prediction continue for 1/4 epochs, stop training
-        verbose=1)
-    stop_to_avoid_divergence = Avoid_Divergence(random_accuracy=1. /
-                                                float(max(y_train)[0] + 1),
-                                                num_batch=num_samples / float(batch_size)
-                                                )
+    stop_early = tf.keras.callbacks.EarlyStopping(monitor='val_acc',
+                                                  patience=5,
+                                                  verbose=1)
+    stop_to_avoid_divergence = Avoid_Divergence(
+        random_accuracy=1. / float(max(y_train)[0] + 1),
+        num_batch=num_samples / float(batch_size))
     model.compile(loss=loss, optimizer=op, metrics=['acc'])
     oh = OneHotEncoder(sparse=False)
     oh.fit(y_train)
