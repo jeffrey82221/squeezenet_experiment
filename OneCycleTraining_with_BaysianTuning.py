@@ -27,7 +27,7 @@ class Avoid_Divergence(tf.keras.callbacks.Callback):
             self.invalid_batch_count = 0
         if self.invalid_batch_count > self.patient:
             self.model.stop_training = True
-            print("Training Stop because Acc < random for " + self.patient +
+            print("Training Stop because Acc < random for " + str(self.patient) +
                   "times")
 
 
@@ -95,7 +95,7 @@ pbounds = {
     'small_filter_rate': (0.5, 0.5),  # 10
     'max_lr_exp': (-6, -1),  # 6
     'max_momentum': (0.8, 0.99),
-    'num_epoch': (3, 30)
+    'num_epoch': (3, 10)
 }
 optimizer = BayesianOptimization(
     f=OneCycleTrain,
