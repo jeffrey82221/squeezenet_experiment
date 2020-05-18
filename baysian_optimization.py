@@ -15,7 +15,7 @@ from SqueezeNetFunction import SqueezeNetFunction
 pbounds = {
     'squeeze_scale_exp': (1.5, 1.5),  # 2
     'small_filter_rate': (0.5, 0.5),  # 10
-    'lr_exp': (-6., -3.5)            # 6
+    'lr_exp': (-4.7, -3.7)            # 6
 }
 
 optimizer = BayesianOptimization(
