@@ -72,11 +72,10 @@ def OneCycleTrain(squeeze_scale_exp, small_filter_rate, max_lr_exp,
         validation_data=(X_test / 255., oh.transform(y_test)),
         callbacks=[lr_manager, stop_early, stop_to_avoid_divergence],
         shuffle=True)
-    if len(history.history['val_acc']) == 0:
-        # if the training end before one epoch end.
-        final_val_acc = -1e13
-    else:
+    try:
         final_val_acc = history.history['val_acc'][-1]
+    except:
+        final_val_acc = -1e13
     del model
     gc.collect()
     tf.keras.backend.clear_session()
