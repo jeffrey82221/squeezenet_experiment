@@ -72,12 +72,16 @@ def OneCycleTrain(squeeze_scale_exp, small_filter_rate, max_lr_exp,
         validation_data=(X_test / 255., oh.transform(y_test)),
         callbacks=[lr_manager, stop_early, stop_to_avoid_divergence],
         shuffle=True)
-    final_val_acc = history.history['val_acc'][-1]
+    if len(history.history['val_acc']) == 0:
+        # if the training end before one epoch end.
+        final_val_acc = -1e13
+    else:
+        final_val_acc = history.history['val_acc'][-1]
     del model
     gc.collect()
     tf.keras.backend.clear_session()
-#cuda.select_device(0)
-#cuda.close()
+# cuda.select_device(0)
+# cuda.close()
     return final_val_acc
 
     # TODO:
