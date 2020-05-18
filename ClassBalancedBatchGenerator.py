@@ -1,12 +1,24 @@
 import random
 import numpy as np
+from tensorflow.python.keras.utils.data_utils import Sequence
 
 
-class ClassBalancedBatchGenerator():
+class ClassBalancedBatchGenerator(Sequence):
   def __init__(self, X_train, y_train, batch_size):
     self.X_train = X_train
     self.y_train = y_train
     self.batch_size = batch_size
+    self.generator = self.train_generator(batch_size=batch_size)
+
+  def __len__(self):
+    return np.floor(self.X_train.shape[0] / self.batch_size)
+
+  @property
+  def shape(self):
+    return self.X_train.shape
+
+  def next(self):
+    return self.__next__()
 
   def get_rearranged_batch_indices(self, X_train, y_train):
     num_instance_for_each_class = int(len(X_train) / 100)
@@ -40,3 +52,6 @@ class ClassBalancedBatchGenerator():
     while True:
       batch_indices = next(batch_indices_gen)
       yield self.X_train[batch_indices], self.y_train[batch_indices]
+
+  def __next__(self):
+    return next(self.generator)
