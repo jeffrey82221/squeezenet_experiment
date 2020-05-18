@@ -18,7 +18,6 @@ class ClassBalancedBatchGenerator(Sequence):
     self.batch_size = batch_size
     assert self.batch_size % 100 == 0
     self.generator = self.train_generator()
-    self.new_indices = self.get_rearranged_batch_indices()
 
   def __len__(self):
     return int(self.X_train.shape[0] / self.batch_size)
@@ -36,26 +35,21 @@ class ClassBalancedBatchGenerator(Sequence):
   def get_rearranged_batch_indices(self):
     num_instance_for_each_class = int(len(self.X_train) / 100)
     indices_for_each_class = [
-        np.where(self.y_train == c)[0] for c in range(100)
+        np.where(self.y_train[:, c] == 1)[0] for c in range(100)
     ]
-    #indices_for_each_class = [np.where(y_train == c)[0] for c in range(100)]
     for c in range(100):
       random.shuffle(indices_for_each_class[c])
-    #new_indices = []
-    # for i in range(num_instance_for_each_class):
-    #  for c in range(100):
-    #    new_indices.append(indices_for_each_class[c][i])
     return np.vstack(indices_for_each_class).T.flatten()
 
   def batch_indice_generator(self):
-
     train_data_num = len(self.X_train)
     batch_count = int(train_data_num / self.batch_size)
     while True:
+      new_indices = self.get_rearranged_batch_indices()
       for current_batch_id in range(batch_count):
-        yield self.new_indices[current_batch_id *
-                               self.batch_size:(current_batch_id + 1) *
-                               self.batch_size]
+        yield new_indices[current_batch_id *
+                          self.batch_size:(current_batch_id + 1) *
+                          self.batch_size]
 
   def train_generator(self):
     batch_indices_gen = self.batch_indice_generator()
