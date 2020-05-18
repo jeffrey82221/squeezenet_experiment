@@ -11,7 +11,7 @@ class ClassBalancedBatchGenerator(Sequence):
     self.generator = self.train_generator(batch_size=batch_size)
 
   def __len__(self):
-    return np.floor(self.X_train.shape[0] / self.batch_size)
+    return int(self.X_train.shape[0] / self.batch_size)
 
   @property
   def shape(self):
