@@ -14,22 +14,23 @@ from numba import cuda
 
 
 class Avoid_Divergence(tf.keras.callbacks.Callback):
-    def __init__(self, random_accuracy, num_batch, patient=5):
+    def __init__(self, random_accuracy, num_batch):
         super(tf.keras.callbacks.Callback, self).__init__()
         self.random_accuracy = random_accuracy
         self.invalid_batch_count = 0
-        self.patient = patient
+        self.patient = num_batch / 4.
         self.num_batch = num_batch
 
     def on_train_batch_end(self, batch, logs=None):
-        if batch > self.num_batch * 2 and logs.get('acc') <= self.random_accuracy:
+        if batch > self.num_batch * 2 and logs.get(
+                'acc') <= self.random_accuracy:
             self.invalid_batch_count += 1
         else:
             self.invalid_batch_count = 0
         if self.invalid_batch_count > self.patient:
             self.model.stop_training = True
-            print("Training Stop because Acc < random for " + str(self.patient) +
-                  "times")
+            print("Training Stop because Acc < random for " +
+                  str(self.patient) + "times")
 
 
 def OneCycleTrain(squeeze_scale_exp, small_filter_rate, max_lr_exp,
@@ -57,13 +58,16 @@ def OneCycleTrain(squeeze_scale_exp, small_filter_rate, max_lr_exp,
     lr_manager = OneCycleLR(max_lr,
                             maximum_momentum=max_momentum,
                             minimum_momentum=max_momentum - 0.1)
-    stop_early = tf.keras.callbacks.EarlyStopping(monitor='val_acc',
-                                                  num_samples / float(batch_size),
-                                                  patience=num_samples / float(batch_size) / 4.,
-                                                  # if random prediction continue for 1/4 epochs, stop training
-                                                  verbose=1)
+    stop_early = tf.keras.callbacks.EarlyStopping(
+        monitor='val_acc',
+        num_samples / float(batch_size),
+        patience=num_samples / float(batch_size) / 4.,
+        # if random prediction continue for 1/4 epochs, stop training
+        verbose=1)
     stop_to_avoid_divergence = Avoid_Divergence(random_accuracy=1. /
-                                                float(max(y_train)[0] + 1))
+                                                float(max(y_train)[0] + 1),
+                                                num_batch=num_samples / float(batch_size)
+                                                )
     model.compile(loss=loss, optimizer=op, metrics=['acc'])
     oh = OneHotEncoder(sparse=False)
     oh.fit(y_train)
@@ -82,8 +86,8 @@ def OneCycleTrain(squeeze_scale_exp, small_filter_rate, max_lr_exp,
     del model
     gc.collect()
     tf.keras.backend.clear_session()
-# cuda.select_device(0)
-# cuda.close()
+    # cuda.select_device(0)
+    # cuda.close()
     return final_val_acc
 
     # TODO:
