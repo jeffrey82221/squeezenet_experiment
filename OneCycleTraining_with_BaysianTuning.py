@@ -24,20 +24,13 @@ f = open('data.p', 'rb')
                      y_test) = pickle.load(f)  # cifar100.load_data()
 num_samples = len(X_train)
 
-lr_callback = LRFinder(
-    num_samples,
-    batch_size,
-    minimum_lr,
-    maximum_lr,
-    # validation_data=(X_val, Y_val),
-    lr_scale='exp',
-    save_dir='lr_log')
+
 op = tf.keras.optimizers.Nadam()  # .SGD(momentum=0.95)  # , decay=1e-6, momentum=0.9)
 model = squeeze_net(small_filter_rate=small_filter_rate,
                     squeeze_scale=scale,
                     verbose=False)
 loss = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
-lr_manager = OneCycleLR(num_samples, num_epoch, batch_size, max_lr
+lr_manager = OneCycleLR(num_samples, num_epoch, batch_size, max_lr,
                         end_percentage=0.1, scale_percentage=None,
                         maximum_momentum=None, minimum_momentum=None)
 model.compile(loss=loss, optimizer=op, metrics=['acc'])
