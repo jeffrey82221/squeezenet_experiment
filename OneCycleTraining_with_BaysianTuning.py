@@ -13,7 +13,26 @@ from numba import cuda
 # Reference: https://github.com/titu1994/keras-one-cycle
 
 
-def OneCycleTrain(squeeze_scale_exp, small_filter_rate, max_lr_exp, max_momentum, num_epoch):
+class Avoid_Divergence(tf.keras.callbacks.Callback):
+    def __init__(self, random_accuracy, patient=5):
+        super(tf.keras.callbacks.Callback, self).__init__()
+        self.random_accuracy = random_accuracy
+        self.invalid_batch_count = 0
+        self.patient = patient
+
+    def on_train_batch_end(self, batch, logs=None):
+        if logs.get('acc') <= self.random_accuracy:
+            self.invalid_batch_count += 1
+        else:
+            self.invalid_batch_count = 0
+        if self.invalid_batch_count > self.patient:
+            self.model.stop_training = True
+            print("Training Stop because Acc < random for " + self.patient +
+                  "times")
+
+
+def OneCycleTrain(squeeze_scale_exp, small_filter_rate, max_lr_exp,
+                  max_momentum, num_epoch):
     # def LRSearch(squeeze_scale_exp, small_filter_rate):
     scale = 10**squeeze_scale_exp  # float(sys.argv[1])  # float(sys.argv[1])
     small_filter_rate = small_filter_rate  # float(sys.argv[2])  # float(sys.argv[2])
@@ -28,22 +47,31 @@ def OneCycleTrain(squeeze_scale_exp, small_filter_rate, max_lr_exp, max_momentum
                          y_test) = pickle.load(f)  # cifar100.load_data()
     num_samples = len(X_train)
 
-    op = tf.keras.optimizers.SGD(momentum=max_momentum - 0.05, nesterov=True)  # , decay=1e-6, momentum=0.9)
+    op = tf.keras.optimizers.SGD(momentum=max_momentum - 0.05,
+                                 nesterov=True)  # , decay=1e-6, momentum=0.9)
     model = squeeze_net(small_filter_rate=small_filter_rate,
                         squeeze_scale=scale,
                         verbose=False)
     loss = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
-    lr_manager = OneCycleLR(max_lr, maximum_momentum=max_momentum, minimum_momentum=max_momentum - 0.1)
+    lr_manager = OneCycleLR(max_lr,
+                            maximum_momentum=max_momentum,
+                            minimum_momentum=max_momentum - 0.1)
+    stop_early = tf.keras.callbacks.EarlyStopping(monitor='val_acc',
+                                                  patience=5,
+                                                  verbose=1)
+    stop_to_avoid_divergence = Avoid_Divergence(random_accuracy=1. /
+                                                float(max(y_train)[0] + 1))
     model.compile(loss=loss, optimizer=op, metrics=['acc'])
     oh = OneHotEncoder(sparse=False)
     oh.fit(y_train)
-    history = model.fit(X_train / 255.,
-                        oh.transform(y_train),
-                        epochs=num_epoch,
-                        batch_size=batch_size,
-                        validation_data=(X_test / 255.,
-                                         oh.transform(y_test)),
-                        callbacks=[lr_manager], shuffle=True)
+    history = model.fit(
+        X_train / 255.,
+        oh.transform(y_train),
+        epochs=num_epoch,
+        batch_size=batch_size,
+        validation_data=(X_test / 255., oh.transform(y_test)),
+        callbacks=[lr_manager, stop_early, stop_to_avoid_divergence],
+        shuffle=True)
     final_val_acc = history.history['val_acc'][-1]
     del model
     gc.collect()
@@ -56,6 +84,8 @@ def OneCycleTrain(squeeze_scale_exp, small_filter_rate, max_lr_exp, max_momentum
     # 1. modulize the training process : input arguments and output val acc
     # 2. incorporating GPU cleaning scheme
     # 3. incorporating the baysian optimization scheme for tuning num_epoch and max_lr
+
+
 from bayes_opt import BayesianOptimization
 from bayes_opt.logger import JSONLogger
 from bayes_opt.event import Events
@@ -63,7 +93,7 @@ from bayes_opt.util import load_logs
 pbounds = {
     'squeeze_scale_exp': (1.5, 1.5),  # 2
     'small_filter_rate': (0.5, 0.5),  # 10
-    'max_lr_exp': (-6, -1),            # 6
+    'max_lr_exp': (-6, -1),  # 6
     'max_momentum': (0.8, 0.99),
     'num_epoch': (3, 30)
 }
@@ -83,7 +113,7 @@ optimizer.subscribe(Events.OPTIMIZATION_STEP, logger)
 # run the optimization
 optimizer.maximize(
     init_points=300,  # determine according to the boundary of each parameter
-    n_iter=8,      # also determine by the boundary of each parameter
+    n_iter=8,  # also determine by the boundary of each parameter
 )
 
 # access history and result
