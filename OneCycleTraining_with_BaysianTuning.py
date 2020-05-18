@@ -38,7 +38,9 @@ history = model.fit(X_train / 255.,
                     oh.transform(y_train),
                     epochs=num_epoch,
                     batch_size=batch_size,
-                    callbacks=[lr_manager])
+                    validation_data=(X_test / 255.,
+                                     oh.transform(y_test)),
+                    callbacks=[lr_manager], shuffle=True)
 # TODO:
 # 1. modulize the training process : input arguments and output val acc
 # 2. incorporating GPU cleaning scheme
