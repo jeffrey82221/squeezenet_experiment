@@ -82,7 +82,8 @@ def OneCycleTrain(squeeze_scale_exp, small_filter_rate, max_lr_exp,
             oh.transform(y_test)),
         callbacks=[lr_manager, stop_early, stop_to_avoid_divergence],
         shuffle=False,
-        use_multiprocessing=False
+        use_multiprocessing=True,
+        workers = 4
     )
     try:
         final_val_acc = history.history['val_acc'][-1]
@@ -108,9 +109,9 @@ from bayes_opt.util import load_logs
 pbounds = {
     'squeeze_scale_exp': (1.5, 1.5),  # 2
     'small_filter_rate': (0.5, 0.5),  # 10
-    'max_lr_exp': (-6, -1),  # 6
+    'max_lr_exp': (-4, -2),  # 6
     'max_momentum': (0.8, 0.99),
-    'num_epoch': (3, 10)
+    'num_epoch': (20, 50)
 }
 optimizer = BayesianOptimization(
     f=OneCycleTrain,
