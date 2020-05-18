@@ -38,13 +38,14 @@ class ClassBalancedBatchGenerator(Sequence):
     indices_for_each_class = [
         np.where(self.y_train == c)[0] for c in range(100)
     ]
+    #indices_for_each_class = [np.where(y_train == c)[0] for c in range(100)]
     for c in range(100):
       random.shuffle(indices_for_each_class[c])
-    new_indices = []
-    for i in range(num_instance_for_each_class):
-      for c in range(100):
-        new_indices.append(indices_for_each_class[c][i])
-    return new_indices
+    #new_indices = []
+    # for i in range(num_instance_for_each_class):
+    #  for c in range(100):
+    #    new_indices.append(indices_for_each_class[c][i])
+    return np.vstack(indices_for_each_class).T.flatten()
 
   def batch_indice_generator(self):
 
