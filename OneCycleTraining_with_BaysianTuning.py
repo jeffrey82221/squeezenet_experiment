@@ -48,8 +48,8 @@ def OneCycleTrain(squeeze_scale_exp, small_filter_rate, max_lr_exp, max_momentum
     del model
     gc.collect()
     tf.keras.backend.clear_session()
-    cuda.select_device(0)
-    cuda.close()
+#cuda.select_device(0)
+#cuda.close()
     return final_val_acc
 
     # TODO:
