@@ -14,7 +14,7 @@ scale = 10**float(sys.argv[1])  # float(sys.argv[1])
 small_filter_rate = float(sys.argv[2])  # float(sys.argv[2])
 batch_size = 2048
 minimum_lr = 1e-8
-maximum_lr = 10000.
+maximum_lr = 1e8
 f = open('data.p', 'rb')
 (X_train, y_train), (X_test,
                      y_test) = pickle.load(f)  # cifar100.load_data()
@@ -28,7 +28,7 @@ lr_callback = LRFinder(
     # validation_data=(X_val, Y_val),
     lr_scale='exp',
     save_dir='lr_log')
-op = tf.keras.optimizers.Nadam()  # , decay=1e-6, momentum=0.9)
+op = tf.keras.optimizers.SGD(momentum=0.95)  # , decay=1e-6, momentum=0.9)
 model = squeeze_net(small_filter_rate=small_filter_rate,
                     squeeze_scale=scale,
                     verbose=False)
@@ -43,7 +43,7 @@ history = model.fit(X_train / 255.,
                     callbacks=[lr_callback])
 
 # Test:
-from LR_Range_Search import LRSearch
+#from LR_Range_Search import LRSearch
 import numpy as np
 for i in np.load('lr_log/lrs.npy'):
   print(i)
