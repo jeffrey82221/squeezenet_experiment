@@ -1,3 +1,4 @@
+from OneCycleTrainFunc import OneCycleTrain
 from bayes_opt import BayesianOptimization
 from bayes_opt.logger import JSONLogger
 from bayes_opt.util import load_logs
